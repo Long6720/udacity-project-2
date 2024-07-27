@@ -12,39 +12,22 @@ const port = process.env.PORT || 8082;
 app.use(bodyParser.json());
 
 app.get("/filteredimage", async (req, res) => {
-  const { image_url } = req.query.image_url.toString();
+  const { image_url } = req.query;
 
   if (!image_url) {
     res.status(400).send({ message: "image_url is required or malformed" });
     return;
   }
 
-  // create a regex to validate the image_url
-  const expression =
-    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi;
-  const regex = new RegExp(expression);
+  const filteredImageIsFound = filterImageFromURL(image_url);
+  console.log("filteredImageIsFound", filteredImageIsFound);
 
-  // validate if the image_url is well formed
-  if (!image_url.match(regex)) {
-    res.status(400).send({ message: "image_url is required or malformed" });
-    return;
-  }
+  // res.status(200).sendFile(filteredImageIsFound, () => {
+  //   console.log(`filteredImageIsFound`, filteredImageIsFound);
+  //   deleteLocalFiles([filteredImageIsFound]);
+  // });
 
-  // validate the type of the image
-  if (
-    !image_url.toLowerCase().endsWith(".jpeg") &&
-    !image_url.toLowerCase().endsWith(".jpg") &&
-    !image_url.toLowerCase().endsWith(".png") &&
-    !image_url.toLowerCase().endsWith(".bmp") &&
-    !image_url.toLowerCase().endsWith(".tiff")
-  ) {
-    res.status(400).send({ message: "image not supported" });
-    return;
-  }
-
-  const filteredImages = filterImageFromURL(image_url);
-
-  filteredImages
+  filteredImageIsFound
     .then((image) => {
       res.sendFile(image, () => {
         const imagesToBeDeleted = new Array(image);
@@ -52,7 +35,7 @@ app.get("/filteredimage", async (req, res) => {
       });
     })
     .catch((error) => {
-      res.status(404).send({ message: "Image not found" });
+      res.status(404).send({ message: "Image not found", error });
       return;
     });
 });
