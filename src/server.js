@@ -22,11 +22,6 @@ app.get("/filteredimage", async (req, res) => {
   const filteredImageIsFound = filterImageFromURL(image_url);
   console.log("filteredImageIsFound", filteredImageIsFound);
 
-  // res.status(200).sendFile(filteredImageIsFound, () => {
-  //   console.log(`filteredImageIsFound`, filteredImageIsFound);
-  //   deleteLocalFiles([filteredImageIsFound]);
-  // });
-
   filteredImageIsFound
     .then((image) => {
       res.sendFile(image, () => {
